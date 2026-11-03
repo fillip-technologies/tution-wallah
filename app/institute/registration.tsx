@@ -57,7 +57,7 @@ export default function Registration() {
       term_condition: false,
       adhar_number: "",
       blur: "true",
-      isVerified: "true",
+      isVerified: "false",
     },
   });
 
@@ -96,7 +96,7 @@ export default function Registration() {
       term_condition: data.term_condition ? "true" : "false",
       adhar_number: data.adhar_number.trim(),
       blur: "true",
-      isVerified: "true",
+      isVerified: "false",
     };
 
     dispatch(setInstituteData(payload));
