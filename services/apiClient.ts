@@ -4,12 +4,12 @@ import { store } from "@/store/index";
 import { clearAuth } from "@/store/authSlice";
 
 // ─── Environment URL Toggle (true = test locally, false = live server) ────────
-const USE_LOCAL_BACKEND = false;
-const LOCAL_IP = "192.168.29.180";
+const USE_LOCAL_BACKEND = true;
+const LOCAL_IP = "192.168.0.113";
 
 export const BASE_URL = USE_LOCAL_BACKEND
-  ? `http://${LOCAL_IP}:8000/api`
-  : "https://apicoaching.fillipsoftware.com/api";
+  ? `http://${LOCAL_IP}:8001/api`
+  : "https://tutionwalah.com/api";
 
 // ─── Single authenticated axios instance ──────────────────────────────────────
 const apiClient = axios.create({

@@ -41,7 +41,7 @@ export default function UserFlow() {
             </View>
 
             <View className="flex-1 justify-start mt-8">
-              <View className="mb-12">
+              <View className="mb-8">
                 <Text className=" font-semibold text-primary text-center mb-2">
                   CHOOSE YOUR ROLE
                 </Text>
@@ -52,7 +52,7 @@ export default function UserFlow() {
               </View>
 
               <TouchableOpacity
-                className="bg-primary py-4 px-4 rounded-xl shadow-sm mb-8"
+                className="bg-primary py-4 px-4 rounded-xl shadow-sm mb-4"
                 onPress={() => router.push("/student/login")}
               >
                 <Text className="text-white text-center text-lg font-medium">
@@ -62,8 +62,21 @@ export default function UserFlow() {
                   Explore institutions, apply and track your progress
                 </Text>
               </TouchableOpacity>
+
               <TouchableOpacity
-                className="bg-gray-100 py-4 px-4 rounded-xl border border-gray-300"
+                className="bg-gray-100 py-4 px-4 rounded-xl border border-gray-300 mb-4"
+                onPress={() => router.push("/institute/login")}
+              >
+                <Text className="text-primary text-center text-lg font-medium">
+                  I’m a Tutor
+                </Text>
+                <Text className="text-gray-600 text-center text-sm mt-1">
+                  Offer home tuition or private classes to students
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                className="bg-gray-100 py-4 px-4 rounded-xl border border-gray-300 mb-4"
                 onPress={() => router.push("/institute/login")}
               >
                 <Text className="text-primary text-center text-lg font-medium">
@@ -75,7 +88,7 @@ export default function UserFlow() {
               </TouchableOpacity>
             </View>
 
-            <View className="mb-12">
+            <View className="mb-8 mt-2">
               <TouchableOpacity
                 className="flex-row items-center justify-center mb-2"
                 onPress={() => router.push("/others/contact")}

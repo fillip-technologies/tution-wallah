@@ -2,12 +2,11 @@
   "expo": {
     "name": "Tution Walah",
     "slug": "dev",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/tutionwala.png",
     "scheme": "dev",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true
     },
@@ -16,13 +15,8 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true,
-      "androidStatusBar": {
-        "barStyle": "dark-content",
-        "backgroundColor": "#ffffff",
-        "translucent": false
-      },
-      "package": "com.tutionwalah"
+      "package": "com.tutionwalah",
+      "versionCode": 12
     },
     "web": {
       "bundler": "metro",
