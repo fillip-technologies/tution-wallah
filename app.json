@@ -4,7 +4,7 @@
     "slug": "dev",
     "version": "1.0.1",
     "orientation": "portrait",
-    "icon": "./assets/images/tutionwala.png",
+    "icon": "./assets/images/launcher-icon.png",
     "scheme": "dev",
     "userInterfaceStyle": "automatic",
     "ios": {
@@ -12,8 +12,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/images/adaptive-foreground.png",
+        "backgroundColor": "#000000"
       },
       "package": "com.tutionwalah",
       "versionCode": 12

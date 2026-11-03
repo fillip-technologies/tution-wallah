@@ -1,4 +1,5 @@
 import React from "react";
+import { cleanSubjectName } from "@/utils/subject";
 import Entypo from "@expo/vector-icons/Entypo";
 import { Ionicons } from "@expo/vector-icons";
 import logo from "@/assets/images/splash-logo.png";
@@ -78,7 +79,7 @@ export default function CoachingCard({ center, onPress }: Props) {
           <View className="flex-row flex-wrap mt-1">
             {subjectsList.length > 0 ? (
               subjectsList.slice(0, 3).map((s: any, i: number) => {
-                const subName = typeof s === "string" ? s : (s?.subject_name || s?.name || "Subject");
+                const subName = cleanSubjectName(typeof s === "string" ? s : (s?.subject_name || s?.name || "Subject"));
                 return (
                   <View
                     key={i}

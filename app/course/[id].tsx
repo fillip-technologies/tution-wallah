@@ -8,6 +8,7 @@ import {
   requestEnrollment,
 } from "@/services/enrollmentService";
 import { useGetApiData } from "@/hooks";
+import { cleanSubjectName } from "@/utils/subject";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
@@ -18,7 +19,6 @@ import {
   ActivityIndicator,
   Alert,
   Image,
-  Linking,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -137,7 +137,7 @@ function SubjectPicker({
                   color: isSelected ? "#B92124" : "#1e293b",
                 }}
               >
-                {s.subject_name}
+                {cleanSubjectName(s.subject_name)}
               </Text>
             </View>
             <Text
@@ -333,35 +333,8 @@ export default function CourseDetail() {
     };
   }, [matchedFromAll, matchedFromListing, params]);
 
-  // Format clean, complete address avoiding duplicate city/state
-  const formatAddress = () => {
-    const rawAddr = institute.full_address?.trim() || "";
-    const city = institute.city?.trim() || "";
-    const pincode = institute.pincode?.trim() || "";
-    const state = institute.state?.trim() || "";
-
-    const parts: string[] = [];
-    if (rawAddr) parts.push(rawAddr);
-
-    if (city && (!rawAddr || !rawAddr.toLowerCase().includes(city.toLowerCase()))) {
-      parts.push(city);
-    }
-
-    let result = parts.join(", ");
-    if (pincode) {
-      result += result ? ` - ${pincode}` : pincode;
-    }
-    if (state && (!result || !result.toLowerCase().includes(state.toLowerCase()))) {
-      result += result ? `, ${state}` : state;
-    }
-
-    return result || "Address not provided";
-  };
-
   const instituteName = institute.name;
   const subjects: SubjectOption[] = institute.subject || [];
-  const address = formatAddress();
-  const mobile = institute.phone?.trim() || "Not available";
   const city_name = institute.city?.trim() || "";
   const pincode = institute.pincode?.trim() || "";
   const rating = institute.rating ? String(institute.rating) : "4.8";
@@ -371,7 +344,7 @@ export default function CourseDetail() {
   const activeSubject = selectedSubject ?? (subjects.length > 0 ? subjects[0] : null);
   const coursePrice = activeSubject ? parseFloat(activeSubject.monthly_fee) : 0;
   const courseName = activeSubject
-    ? `${instituteName} — ${activeSubject.subject_name}`
+    ? `${instituteName} — ${cleanSubjectName(activeSubject.subject_name)}`
     : instituteName;
 
   // Enrollment request status for the selected subject
@@ -564,17 +537,6 @@ export default function CourseDetail() {
               >
                 Institute Information
               </Text>
-              <InfoRow label="📍 Address" value={address} />
-              <InfoRow
-                label="📞 Mobile"
-                value={mobile}
-                onPress={
-                  mobile !== "Not available"
-                    ? () => Linking.openURL(`tel:${mobile}`)
-                    : undefined
-                }
-                isAction={mobile !== "Not available"}
-              />
               {city_name ? <InfoRow label="🏙️ City" value={city_name} /> : null}
               {pincode ? <InfoRow label="📮 Pincode" value={pincode} /> : null}
             </View>
@@ -621,7 +583,7 @@ export default function CourseDetail() {
               </Text>
               <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
                 <Text style={{ fontSize: 16, color: "#1e293b", fontWeight: "600" }}>
-                  {activeSubject.subject_name}
+                  {cleanSubjectName(activeSubject.subject_name)}
                 </Text>
                 <Text style={{ fontSize: 22, fontWeight: "800", color: "#B92124" }}>
                   ₹{isNaN(coursePrice) ? "—" : Math.ceil(coursePrice).toLocaleString("en-IN")}/month
@@ -714,7 +676,7 @@ export default function CourseDetail() {
             title={
               enrollStatus === "none"
                 ? activeSubject
-                  ? `Request to Enroll in ${activeSubject.subject_name}`
+                  ? `Request to Enroll in ${cleanSubjectName(activeSubject.subject_name)}`
                   : "Request to Enroll"
                 : "Request Again"
             }
