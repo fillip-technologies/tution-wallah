@@ -524,7 +524,6 @@ export default function RazorpayScreen() {
           razorpay_order_id: data.razorpay_order_id,
           razorpay_payment_id: data.razorpay_payment_id,
           razorpay_signature: data.razorpay_signature,
-          course_id: courseId,
         };
 
         // 🔍 STEP 2 — What are we sending to backend?
@@ -636,7 +635,7 @@ export default function RazorpayScreen() {
       {/* WebView */}
       <WebView
         ref={webViewRef}
-        source={{ html: htmlContent, baseUrl: "https://apicoaching.fillipsoftware.com" }}
+        source={{ html: htmlContent, baseUrl: "https://tutionwalah.com" }}
         originWhitelist={["*"]}
         javaScriptEnabled
         domStorageEnabled

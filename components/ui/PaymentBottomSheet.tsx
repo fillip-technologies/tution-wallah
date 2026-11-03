@@ -17,6 +17,7 @@ import { createRazorpayOrder } from "@/services/paymentService";
 interface PaymentBottomSheetProps {
   visible: boolean;
   onClose: () => void;
+  enrollmentRequestId: number;
   courseId: string | string[];
   courseName: string;
   coursePrice: number;   // price in ₹ (rupees)
@@ -136,6 +137,7 @@ function PaymentOption({
 export default function PaymentBottomSheet({
   visible,
   onClose,
+  enrollmentRequestId,
   courseId,
   courseName,
   coursePrice,
@@ -147,7 +149,6 @@ export default function PaymentBottomSheet({
   );
   const [loading, setLoading] = useState(false);
 
-  const amountInPaise = coursePrice * 100;
 
   const handlePayNow = async () => {
     if (!selectedMethod) {
@@ -158,10 +159,7 @@ export default function PaymentBottomSheet({
     setLoading(true);
     try {
       const response = await createRazorpayOrder({
-        amount: amountInPaise,
-        currency,
-        course_id: courseId,
-        receipt: `receipt_${Date.now()}`,
+        enrollment_request_id: enrollmentRequestId,
       });
 
       // 🔍 STEP A — Full backend response
@@ -190,7 +188,10 @@ export default function PaymentBottomSheet({
         Alert.alert("Order Failed", "Could not create payment order. Please try again.");
       }
     } catch (error: any) {
-      Alert.alert("Error", error?.message || "Something went wrong. Please try again.");
+      Alert.alert(
+        "Error",
+        error?.response?.data?.message || error?.message || "Something went wrong. Please try again."
+      );
     } finally {
       setLoading(false);
     }

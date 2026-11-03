@@ -3,10 +3,8 @@ import { postData } from "./apiClient";
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface CreateOrderPayload {
-  amount: number;       // in paise (₹1 = 100 paise)
-  currency: string;
-  course_id: string | string[];
-  receipt?: string;
+  // Amount is decided by the server from the approved request.
+  enrollment_request_id: number;
 }
 
 export interface CreateOrderResponse {
@@ -23,7 +21,6 @@ export interface VerifyPaymentPayload {
   razorpay_order_id: string;
   razorpay_payment_id: string;
   razorpay_signature: string;
-  course_id: string | string[];
 }
 
 export interface VerifyPaymentResponse {

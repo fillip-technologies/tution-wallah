@@ -34,6 +34,19 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
+        name="requests"
+        options={{
+          title: "Requests",
+          headerShown: false,
+          tabBarIcon: ({ color, focused, size }) => (
+            <View style={styles.iconContainer}>
+              <ClipboardList color={color} size={size} />
+            </View>
+          ),
+        }}
+      />
+
+      <Tabs.Screen
         name="profile"
         options={{
           title: "Profile",

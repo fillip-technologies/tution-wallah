@@ -1,14 +1,22 @@
 import logo from "@/assets/images/splash-logo.png";
 import { Button } from "@/components/ui";
 import PaymentBottomSheet from "@/components/ui/PaymentBottomSheet";
+import EnrollmentRequestSheet from "@/components/ui/EnrollmentRequestSheet";
+import {
+  cancelEnrollmentRequest,
+  EnrollmentRequest,
+  requestEnrollment,
+} from "@/services/enrollmentService";
 import { useGetApiData } from "@/hooks";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import {
+  ActivityIndicator,
+  Alert,
   Image,
   Linking,
   ScrollView,
@@ -232,6 +240,8 @@ export default function CourseDetail() {
   const id = params.id;
 
   const [paymentVisible, setPaymentVisible] = useState(false);
+  const [requestVisible, setRequestVisible] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [selectedSubject, setSelectedSubject] = useState<SubjectOption | null>(null);
 
   const { studentToken } = useSelector((state: RootState) => state.auth);
@@ -363,6 +373,55 @@ export default function CourseDetail() {
   const courseName = activeSubject
     ? `${instituteName} — ${activeSubject.subject_name}`
     : instituteName;
+
+  // Enrollment request status for the selected subject
+  const { data: enrollData, refetch: refetchEnroll } = useGetApiData<any>(
+    studentToken && activeSubject ? `/enrollment/status/${activeSubject.id}` : undefined
+  );
+  const enrollment: EnrollmentRequest | null = enrollData?.data ?? null;
+  const enrollStatus = enrollment?.status ?? "none";
+
+  // Refresh status when coming back to this screen (e.g. after institute approval)
+  useFocusEffect(
+    React.useCallback(() => {
+      void refetchEnroll();
+    }, [refetchEnroll])
+  );
+
+  const handleSendRequest = async (note: string) => {
+    if (!activeSubject) return;
+    setSubmitting(true);
+    try {
+      await requestEnrollment(activeSubject.id, note);
+      setRequestVisible(false);
+      await refetchEnroll();
+      Alert.alert("Request Sent", "You can pay once the institute approves your request.");
+    } catch (e: any) {
+      Alert.alert("Could not send request", e?.response?.data?.message || "Please try again.");
+      void refetchEnroll();
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleCancelRequest = () => {
+    if (!enrollment) return;
+    Alert.alert("Cancel request?", "Your request to the institute will be withdrawn.", [
+      { text: "Keep", style: "cancel" },
+      {
+        text: "Cancel Request",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await cancelEnrollmentRequest(enrollment.id);
+          } catch (e: any) {
+            Alert.alert("Error", e?.response?.data?.message || "Please try again.");
+          }
+          void refetchEnroll();
+        },
+      },
+    ]);
+  };
 
   // Loading indicator only when we have zero information about the institute
   const isPending =
@@ -596,30 +655,100 @@ export default function CourseDetail() {
         </View>
       </ScrollView>
 
-      {/* ── Sticky Enroll Button ─────────────────────────────────────────── */}
-      <View
-        style={{
-          position: "absolute",
-          bottom: 20,
-          left: 20,
-          right: 20,
-        }}
-      >
-        <Button
-          title={activeSubject ? `Enroll in ${activeSubject.subject_name}` : "Enroll Now"}
-          onPress={() => setPaymentVisible(true)}
-        />
+      {/* ── Sticky Enroll Button (depends on request status) ─────────────── */}
+      <View style={{ position: "absolute", bottom: 20, left: 20, right: 20 }}>
+        {enrollStatus === "rejected" && enrollment?.reject_reason ? (
+          <Text style={{ textAlign: "center", color: "#B92124", marginBottom: 8, fontSize: 13 }}>
+            Request declined: {enrollment.reject_reason}
+          </Text>
+        ) : null}
+        {enrollStatus === "expired" ? (
+          <Text style={{ textAlign: "center", color: "#92400e", marginBottom: 8, fontSize: 13 }}>
+            Your approval expired. Please send a new request.
+          </Text>
+        ) : null}
+
+        {enrollStatus === "pending" ? (
+          <>
+            <View
+              style={{
+                backgroundColor: "#fef9c3",
+                borderWidth: 1,
+                borderColor: "#fde047",
+                borderRadius: 999,
+                paddingVertical: 16,
+                alignItems: "center",
+                flexDirection: "row",
+                justifyContent: "center",
+                gap: 8,
+              }}
+            >
+              <ActivityIndicator size="small" color="#92400e" />
+              <Text style={{ color: "#92400e", fontSize: 16, fontWeight: "600" }}>
+                Request Sent – Awaiting Approval
+              </Text>
+            </View>
+            <TouchableOpacity onPress={handleCancelRequest} style={{ alignItems: "center", paddingVertical: 8 }}>
+              <Text style={{ color: "#64748b", fontSize: 13 }}>Cancel request</Text>
+            </TouchableOpacity>
+          </>
+        ) : enrollStatus === "approved" ? (
+          <Button
+            title={`Approved – Pay ₹${Math.ceil(enrollment?.amount ?? coursePrice)} & Enroll`}
+            onPress={() => setPaymentVisible(true)}
+          />
+        ) : enrollStatus === "paid" ? (
+          <View
+            style={{
+              backgroundColor: "#dcfce7",
+              borderRadius: 999,
+              paddingVertical: 16,
+              alignItems: "center",
+              marginBottom: 24,
+            }}
+          >
+            <Text style={{ color: "#166534", fontSize: 17, fontWeight: "600" }}>✓ Enrolled</Text>
+          </View>
+        ) : (
+          <Button
+            title={
+              enrollStatus === "none"
+                ? activeSubject
+                  ? `Request to Enroll in ${activeSubject.subject_name}`
+                  : "Request to Enroll"
+                : "Request Again"
+            }
+            onPress={() => {
+              if (!studentToken) {
+                Alert.alert("Login required", "Please log in as a student to send a request.");
+                return;
+              }
+              setRequestVisible(true);
+            }}
+          />
+        )}
       </View>
 
-      {/* ── Payment Bottom Sheet ─────────────────────────────────────────── */}
-      <PaymentBottomSheet
-        visible={paymentVisible}
-        onClose={() => setPaymentVisible(false)}
-        courseId={id}
+      <EnrollmentRequestSheet
+        visible={requestVisible}
         courseName={courseName}
-        coursePrice={isNaN(coursePrice) ? 0 : Math.ceil(coursePrice)}
-        currency="INR"
+        submitting={submitting}
+        onClose={() => setRequestVisible(false)}
+        onSubmit={handleSendRequest}
       />
+
+      {/* ── Payment Bottom Sheet (only reachable once approved) ──────────── */}
+      {enrollment ? (
+        <PaymentBottomSheet
+          visible={paymentVisible}
+          onClose={() => setPaymentVisible(false)}
+          enrollmentRequestId={enrollment.id}
+          courseId={id}
+          courseName={courseName}
+          coursePrice={Math.ceil(enrollment.amount ?? (isNaN(coursePrice) ? 0 : coursePrice))}
+          currency="INR"
+        />
+      ) : null}
     </View>
   );
 }

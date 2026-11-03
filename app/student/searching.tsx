@@ -1,6 +1,7 @@
 import { SearchBar } from "@/components/ui/index";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useMemo, useState } from "react";
+import ServiceFilter, { matchesService, ServiceFilterValue } from "@/components/ui/ServiceFilter";
 import { useRouter } from "expo-router";
 import {
   ScrollView,
@@ -18,6 +19,7 @@ import { RootState } from "@/store";
 const Searching: React.FC = () => {
   const [isFocused, setIsFocused] = useState(false);
   const [query, setQuery] = useState("");
+  const [serviceFilter, setServiceFilter] = useState<ServiceFilterValue>("all");
   const [debouncedQuery, setDebouncedQuery] = useState("");
 
   const router = useRouter();
@@ -93,11 +95,12 @@ const Searching: React.FC = () => {
 
   // ✅ Optimized filtering
   const filteredResults = useMemo(() => {
-    if (!debouncedQuery.trim()) return coachingData;
+    const byService = coachingData.filter((c: any) => matchesService(c, serviceFilter));
+    if (!debouncedQuery.trim()) return byService;
 
     const q = debouncedQuery.toLowerCase();
 
-    return coachingData.filter((item: any) => {
+    return byService.filter((item: any) => {
       const nameMatch = item?.name?.toLowerCase()?.includes(q);
       const subjectMatch =
         Array.isArray(item?.subject) &&
@@ -127,7 +130,7 @@ const Searching: React.FC = () => {
         addressMatch
       );
     });
-  }, [debouncedQuery, coachingData]);
+  }, [debouncedQuery, coachingData, serviceFilter]);
 
   const isLoading =
     (profileLoading && !userProfileData) ||
@@ -170,6 +173,8 @@ const Searching: React.FC = () => {
           )}
         </View>
       </LinearGradient>
+
+      <ServiceFilter value={serviceFilter} onChange={setServiceFilter} />
 
       {/* Loading State */}
       {isLoading ? (

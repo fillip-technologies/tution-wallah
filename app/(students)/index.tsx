@@ -8,7 +8,8 @@ import { RootState } from "@/store";
 import { FontAwesome } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import ServiceFilter, { matchesService, ServiceFilterValue } from "@/components/ui/ServiceFilter";
 import { ScrollView, View } from "react-native";
 import { useSelector } from "react-redux";
 
@@ -124,6 +125,7 @@ const studentsServiceQuestions = [
 
 export default function Index() {
   const router = useRouter();
+  const [serviceFilter, setServiceFilter] = useState<ServiceFilterValue>("all");
   const { studentToken } = useSelector((state: RootState) => state.auth);
 
   // Only request profile when student token is present
@@ -219,8 +221,10 @@ export default function Index() {
         route="exam"
       />
 
+      <ServiceFilter value={serviceFilter} onChange={setServiceFilter} />
+
       <CoachingCardItem
-        centers={coachingData}
+        centers={coachingData.filter((c: any) => matchesService(c, serviceFilter))}
         loading={isLoading}
         onCardPress={(id: number, center?: any) => {
           router.push({
